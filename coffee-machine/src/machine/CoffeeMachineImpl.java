@@ -3,6 +3,11 @@ package machine;
 import java.util.Scanner;
 
 public class CoffeeMachineImpl {
+    private static final int WATER_INDEX = 0;
+    private static final int MILK_INDEX = 1;
+    private static final int COFFEE_INDEX = 2;
+    private static final int CUPS_INDEX = 3;
+    private static final int MONEY_INDEX = 4;
     private int water;
     private int milk;
     private int coffee;
@@ -18,7 +23,7 @@ public class CoffeeMachineImpl {
         this.money = 550;
     }
 
-    private void print() {
+    private void printRemaining() {
         System.out.println("The coffee machine has:");
         System.out.printf("%d of water\n", this.water);
         System.out.printf("%d of milk\n", this.milk);
@@ -83,59 +88,75 @@ public class CoffeeMachineImpl {
         return new int[] {};
     }
 
+    public void processBuy() {
+        int buy = this.getBuyInput();
+
+        if (buy == BuyCaseCode.BACK.getOption()) {
+            return;
+        }
+
+        int[] ingredients = this.getIngredients(buy);
+        if (this.water >= ingredients[WATER_INDEX] && this.milk >= ingredients[MILK_INDEX] && this.coffee >= ingredients[COFFEE_INDEX] && this.cups > ingredients[CUPS_INDEX]) {
+            this.water -= ingredients[WATER_INDEX];
+            this.milk -= ingredients[MILK_INDEX];
+            this.coffee -= ingredients[COFFEE_INDEX];
+            this.money += ingredients[MONEY_INDEX];
+            this.cups--;
+            System.out.println("I have enough resources, making you a coffee!");
+        } else if (this.water < ingredients[WATER_INDEX]) {
+            System.out.println("Sorry, not enough water!");
+        } else if (this.milk < ingredients[MILK_INDEX]) {
+            System.out.println("Sorry, not enough milk!");
+        } else if (this.coffee < ingredients[COFFEE_INDEX]) {
+            System.out.println("Sorry, not enough coffee!");
+        } else if (this.cups == ingredients[CUPS_INDEX]) {
+            System.out.println("Sorry, not enough cup!");
+        }
+    }
+
+    public int getIntInput() {
+        return Integer.parseInt(this.scanner.nextLine());
+    }
+
+    public void processFill() {
+        System.out.println("Write how many ml of water do you want to add: ");
+        this.water += this.getIntInput();
+        System.out.println("Write how many ml of milk do you want to add: ");
+        this.milk += this.getIntInput();
+        System.out.println("Write how many grams of coffee beans do you want to add: ");
+        this.coffee += this.getIntInput();
+        System.out.println("Write how many disposable cups of coffee do you want to add: ");
+        this.cups += this.getIntInput();
+    }
+
+    public void processTake() {
+        System.out.printf("I gave you $%d\n", money);
+        this.money = 0;
+    }
+
+    public void handleInvalidOption() {
+        System.out.println("Invalid option for the Coffee Machine!");
+    }
+
     public void process(String option) {
         switch (option) {
             case "buy":
-                int buy = this.getBuyInput();
-
-                if (buy == BuyCaseCode.BACK.getOption()) {
-                    return;
-                }
-
-                int[] ingredients = this.getIngredients(buy);
-                if (water >= ingredients[0] && milk >= ingredients[1] && coffee >= ingredients[2] && cups > ingredients[3]) {
-                    water -= ingredients[0];
-                    milk -= ingredients[1];
-                    coffee -= ingredients[2];
-                    money += ingredients[4];
-                    cups--;
-                    System.out.println("I have enough resources, making you a coffee!");
-                } else if (water < ingredients[0]) {
-                    System.out.println("Sorry, not enough water!");
-                } else if (milk < ingredients[1]) {
-                    System.out.println("Sorry, not enough milk!");
-                } else if (coffee < ingredients[2]) {
-                    System.out.println("Sorry, not enough coffee!");
-                } else if (cups == ingredients[3]) {
-                    System.out.println("Sorry, not enough cup!");
-                }
+                this.processBuy();
                 break;
             case "fill":
-                System.out.println("Write how many ml of water do you want to add: ");
-                int input = Integer.parseInt(scanner.nextLine());
-                this.water += input;
-                System.out.println("Write how many ml of milk do you want to add: ");
-                input = Integer.parseInt(scanner.nextLine());
-                this.milk += input;
-                System.out.println("Write how many grams of coffee beans do you want to add: ");
-                input = Integer.parseInt(scanner.nextLine());
-                this.coffee += input;
-                System.out.println("Write how many disposable cups of coffee do you want to add: ");
-                input = Integer.parseInt(scanner.nextLine());
-                this.cups += input;
+                this.processFill();
                 break;
             case "take":
-                System.out.printf("I gave you $%d\n", money);
-                this.money = 0;
+                this.processTake();
                 break;
             case "remaining":
-                this.print();
+                this.printRemaining();
                 break;
             case "exit":
                 // Do nothing! This program will exit soon!
                 break;
             default:
-                System.out.println("Invalid option for the Coffee Machine!");
+                this.handleInvalidOption();
                 break;
         }
     }
